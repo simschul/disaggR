@@ -10,3 +10,5 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Depends: truncnorm, nloptr, gtools
+URL: https://github.com/simschul/disaggR
+BugReports: https://github.com/simschul/disaggR/issues
