@@ -37,9 +37,9 @@ rshares <- function(N, alpha, beta = NULL) {
 }
 
 
-rshares(100, c(3,3,3)) %>% boxplot
-rshares(100, c(0.1, 0.3, 0.6)) %>% boxplot
-rshares(100, c(0.1, 0.3, 0.6), c(0.1, 0.01, 0.2)) %>% boxplot
+# rshares(100, c(3,3,3)) %>% boxplot
+# rshares(100, c(0.1, 0.3, 0.6)) %>% boxplot
+# rshares(100, c(0.1, 0.3, 0.6), c(0.1, 0.01, 0.2)) %>% boxplot
 
 
 

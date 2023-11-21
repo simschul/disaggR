@@ -16,6 +16,6 @@ ragg <- function(N, mu_0, sd_0 = NULL, a = 0, b = Inf) {
   }
 
 }
-ragg(N = 100, mu_0 = 1) %>% hist
-ragg(N = 100, mu_0 = 1, sd = 0.5) %>% hist
-ragg(N = 100, mu_0 = 1, sd_0 = 0.5, a = -Inf) %>% hist
+# ragg(N = 100, mu_0 = 1) %>% hist
+# ragg(N = 100, mu_0 = 1, sd = 0.5) %>% hist
+# ragg(N = 100, mu_0 = 1, sd_0 = 0.5, a = -Inf) %>% hist
