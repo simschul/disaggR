@@ -2,7 +2,7 @@ ragg <- function(N, mu_0, sd_0 = NULL, a = 0, b = Inf) {
   if (!is.null(mu_0) & !is.null(sd_0) & a == -Inf & b == Inf) {
     # Normal distribution
     rnorm(N, mu_0, sd_0)
-  } else if (!is.null(mu_0) & !is.null(sd_0) & a == 0 & b == Inf) {
+  } else if (!is.null(mu_0) & !is.null(sd_0)) {
     # Truncated normal
     rtruncnorm(N, a = a, b = b, mean = mu_0, sd = sd_0)
   } else if (!is.null(mu_0) & is.null(sd_0) & a == 0 & b == Inf) {
