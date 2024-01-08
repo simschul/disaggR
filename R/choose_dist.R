@@ -1,18 +1,46 @@
-choose_dist_agg <- function(mu_0, sd_0 , a, b) {
-  if (!is.null(mu_0) & !is.null(sd_0) & a == -Inf & b == Inf) {
-    # Normal distribution
-    return('norm')
-  } else if (!is.null(mu_0) & !is.null(sd_0)) {
-    # Truncated normal
-    return('truncnorm')
-  } else if (!is.null(mu_0) & is.null(sd_0) & a == 0 & b == Inf) {
-    # Exponential
-    return('exp')
-  } else if (is.null(mu_0) & is.null(sd_0) & is.finite(a) & is.finite(b)) {
-    # uniform
+choose_dist_agg <- function(mean, sd, a, b) {
+  if (is.null(mean)) mean <- NA
+  if (is.null(sd)) sd <- NA
+  if (is.null(a)) a <- NA
+  if (is.null(b)) b <- NA
+
+  if (is.finite(a) & is.finite(b) & a >= b) {
+    warning('a must be < b')
+    return(NA)
+  }
+  if (is.finite(sd) & sd <=0) {
+    warning('sd must be positive')
+    return(NA)
+  }
+  if (is.finite(mean) & is.finite(a) & mean <= a) {
+    warning('mean must be > a')
+    return(NA)
+  }
+  if (is.finite(mean) & is.finite(b) & mean >= b) {
+    warning('mean must be < b')
+    return(NA)
+  }
+
+  if (is.finite(mean)) {
+    if (is.finite(sd)) {
+      if (is.finite(a) | is.finite(b)) {
+        # return(generate_distribution('rtruncnorm', mean = mean, sd = sd,
+        #                              a = a, b = b))
+
+        return('truncnorm')
+      } else {
+        # return(generate_distribution('rnorm', mean = mean, sd = sd))
+        return('norm')
+      }
+    } else if (isTRUE(all.equal(a, 0)) & !is.finite(b)) {
+      return('exp')
+    } else {
+      return(NA)
+    }
+  } else if (is.finite(a) & is.finite(b) & !is.finite(sd)) {
     return('unif')
   } else {
-    return(NA)
+    NA
   }
 }
 
