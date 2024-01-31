@@ -6,18 +6,64 @@ rdir_maxent <- function(N, shares, ...) {
 }
 
 rdir1 <- function(N, length) {
-  rdirichlet(N, rep(1, length))
+  sample <- rdirichlet(N, rep(1, length))
+  return(sample)
 }
 
-rgdir <- function(n, mu, u) {
-  alpha <- (mu / u) ^ 2
-  beta <- mu / (u) ^ 2
-  k <- length(alpha)
+# rgdir <- function(n, mu, u) {
+#   alpha <- (mu / u) ^ 2
+#   beta <- mu / (u) ^ 2
+#   k <- length(alpha)
+#   x <- matrix(0, nrow = n, ncol = k)
+#   for (i in 1:k) {
+#     x[, i] <- rgamma(n, shape = alpha[i], rate = beta[i])
+#   }
+#   return(x / rowSums(x))
+# }
+
+#' Title
+#'
+#' @param n
+#' @param alpha
+#' @param beta
+#'
+#' @return
+#' @export
+#'
+#' @examples
+rdirg <- function(n, alpha, beta) {
+
+  if (!isTRUE(all.equal(names(alpha), names(beta)))) {
+    stop('alpha and beta need to have the same column names. can also be both NULL')
+  }
+
+  alpha2 <- (alpha / beta) ^ 2
+  beta2 <- alpha / (beta) ^ 2
+  k <- length(alpha2)
   x <- matrix(0, nrow = n, ncol = k)
   for (i in 1:k) {
-    x[, i] <- rgamma(n, shape = alpha[i], rate = beta[i])
+    x[, i] <- rgamma(n, shape = alpha2[i], rate = beta2[i])
   }
-  return(x / rowSums(x))
+  sample <- x / rowSums(x)
+  colnames(sample) <- names(alpha)
+  return(sample)
+}
+
+#' Random Dirichlet distrubted numbers.
+#' Adds the gamma parameter compared to the standardt Dir variant.
+#' @param n
+#' @param alpha
+#' @param gamma
+#'
+#' @return
+#' @export
+#'
+#' @examples
+rdir <- function(n, alpha, gamma) {
+  sample <- gtools::rdirichlet(n, alpha * gamma)
+  colnames(sample) <- names(alpha)
+  return(sample)
+
 }
 
 
@@ -30,7 +76,7 @@ rshares <- function(N, alpha, beta = NULL) {
     rdir_maxent(N, alpha)
   } else if (!is.null(beta)) {
     # Gen. Dirichlet
-    rgdir(N, alpha, beta)
+    rdirg(N, alpha, beta)
   } else {
     stop('Case not implemented atm.')
   }

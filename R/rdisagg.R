@@ -4,6 +4,7 @@ rdisagg <- function(N, mu_0, sd_0 = NULL, a = 0, b = Inf,
   sample_shares <- rshares(N = N, alpha = alpha, beta = beta)
   sample_disagg <- sample_shares * sample_agg
 
+  #names(sample_disagg) <- names(alpha)
   return(sample_disagg)
 }
 # temp1 <- ragg(N = 3, mu_0 = 100)
