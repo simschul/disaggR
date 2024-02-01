@@ -7,7 +7,7 @@
 generate_sampling_fun(x, ct)
 }
 \arguments{
-\item{n}{}
+\item{ct}{}
 }
 \description{
 Title

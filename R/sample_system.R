@@ -149,7 +149,8 @@ sample_system <- function(n,
                           x = 'x',
                           alpha = 'alpha',
                           beta = 'beta',
-                          y = 'y') {
+                          y = 'y',
+                          ...) {
 
   # choose dists
   dists_agg <- lapply(data[[x]], function(x) {
@@ -162,7 +163,8 @@ sample_system <- function(n,
   })
 
   dists_shares <- lapply(1:nrow(data), function(x) {
-    generate_distribution_shares(alpha = data[[alpha]][[x]], beta = data[[beta]][[x]])
+    generate_distribution_shares(alpha = data[[alpha]][[x]], beta = data[[beta]][[x]],
+                                 ...)
   })
 
 
