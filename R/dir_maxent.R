@@ -74,7 +74,7 @@ find_gamma_maxent2 <- function(shares,
 ) {
 
   # remove shares of zero
-  shares <- shares[which(shares > shares_lb)]
+  #shares <- shares[which(shares > shares_lb)]
 
   # lower and upper bounds
   lb <- bounds[1]
@@ -87,6 +87,10 @@ find_gamma_maxent2 <- function(shares,
       #stop('Error: Could not find an initial value x0 which is defined by eval_f and/or eval_grad_f. Either increase x0_n_tries (defaul: 100), or increase the parameter space with the bounds argument')
       warning('Warning: Could not find an initial value x0 which is defined by eval_f and/or eval_grad_f. Either increase x0_n_tries (defaul: 100), or increase the parameter space with the bounds argument. Q&D solution: x0 is set to 1')
       x0 <- 1
+
+      # remove all very small shares
+      shares[shares < shares_lb]
+
       break
     } else {
       x0 <- runif(1, min = lb, max = ub)
