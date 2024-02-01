@@ -150,9 +150,15 @@ sample_system <- function(n,
                           alpha = 'alpha',
                           beta = 'beta',
                           y = 'y') {
+
   # choose dists
   dists_agg <- lapply(data[[x]], function(x) {
-    generate_distribution_agg(mean = x$mean, sd = x$sd, a = x$a, b = x$b)
+    # Check if x is a list
+    if (is.list(x)) {
+      generate_distribution_agg(mean = x$mean, sd = x$sd, a = x$a, b = x$b)
+    } else if (is.numeric(x) && is.null(dim(x))) {
+      x
+    }
   })
 
   dists_shares <- lapply(1:nrow(data), function(x) {
@@ -161,7 +167,10 @@ sample_system <- function(n,
 
 
   # Step 1: Sample from both lists of functions
-  samples_agg <- lapply(dists_agg, function(x) x(n))
+  samples_agg <- lapply(dists_agg, function(x) {
+    if (is.function(x)) x(n)
+    else x
+  } )
   samples_shares <- lapply(dists_shares, function(x) x(n))
 
   # Step 2: Multiply both samples
