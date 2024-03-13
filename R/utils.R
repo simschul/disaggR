@@ -13,12 +13,14 @@
 #' # Assuming 'mat' is a matrix:
 #' long_dt <- melt_matrix(mat)
 melt_matrix <- function(x, remove_zero = TRUE, remove_non_finite = TRUE) {
+  has_names <- is.character(colnames(x))
   # Convert the matrix to a data.table
   dt <- data.table::as.data.table(x, na.rm = FALSE)
   dt[, x := 1:.N]
   # Melt the data.table
-  long_dt <- melt(dt, id.vars = "x", variable.name = "y", value.name = "value")
-  long_dt[, y := as.integer(gsub("V", "", y))]
+  long_dt <- melt(dt, id.vars = "x", variable.name = "y", value.name = "value",
+                  variable.factor = FALSE)
+  if (isFALSE(has_names)) long_dt[, y := as.integer(gsub("V", "", y))]
 
   if (isTRUE(remove_zero))  long_dt <- long_dt[value > 0]
   if (isTRUE(remove_non_finite))  long_dt <- long_dt[is.finite(value)]

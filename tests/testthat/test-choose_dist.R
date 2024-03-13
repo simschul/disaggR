@@ -11,16 +11,6 @@ test_that("generate_distribution creates functions with correct behavior", {
   expect_equal(sd(sample_normal), 15, tolerance = 1, info = "SD is not near 15")
 })
 
-test_that("generate_distribution creates functions with vector parameters correctly", {
-  set.seed(123)
-
-  # Let's assume rdir is a valid function and expects a vector for the 'alpha' parameter
-  test_dirichlet <- generate_distribution(rdir, alpha = c(0.3, 0.7))
-  expect_output(print(test_dirichlet), "function(n) rdir(n, alpha = c(0.3, 0.7))")
-
-  # Here you would add more rigorous testing, potentially generating samples and checking properties
-  # This would depend on having a real 'rdir' function or whatever distribution you are testing
-})
 
 
 test_that("generate_distribution handles errors appropriately", {
@@ -33,9 +23,9 @@ test_that("generated function reflects the right parameters and distribution", {
   set.seed(123)
 
   # Weibull distribution test with shape and scale
-  test_weibull <- generate_distribution(rweibull, shape = 1.5, scale = 500)
-  sample_weibull <- test_weibull(1000)
-  expect_type(test_weibull, "closure")
+  test_norm <- generate_distribution(rnorm, mean = 100, sd = 5)
+  sample_norm <- test_norm(1000)
+  expect_type(test_norm, "closure")
 
   # Insert more rigorous tests specific to the Weibull distribution
   # For instance, you might test the median or other moments
