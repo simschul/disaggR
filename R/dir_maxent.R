@@ -46,9 +46,9 @@ eval_f <- function(x, shares) {
 #' @param shares
 #' @param eval_f
 #' @param eval_grad_f
-#' @param x0
+#' @param x0 initial value. If not defined by eval_f and/or eval_grad_f there is a automatical procedure to find a valid initial value within the `bounds`. If none is found, the `shares_lb` arguments is used to remove all shares below that threshold (default is 0)
 #' @param bounds
-#' @param shares_lb lower bound of shares. Only values LARGER than that will be considered (set this to e.g. 1E-4) to increase chance of convergence
+#' @param shares_lb lower bound of shares. Only is of relevance if no starting value x0 could found be which is defined by eval_f and/or eval_grad_f. set this to e.g. 1E-4) to increase chance of convergence
 #' @param local_opts
 #' @param opts
 #'
@@ -73,25 +73,44 @@ find_gamma_maxent2 <- function(shares,
 
 ) {
 
-  # remove shares of zero
+  # remove shares of zero: moved to below
   #shares <- shares[which(shares > shares_lb)]
+
+  if (!isTRUE(all.equal(sum(shares), 1))) {
+    stop('Shares must sum to 1. But `sum(shares)` gives ', sum(shares))
+  }
 
   # lower and upper bounds
   lb <- bounds[1]
   ub <- bounds[2]
 
   count <- 0
+  count2 <- 0
   while(!is.finite(eval_f(x = x0, shares = shares))
         | !is.finite(eval_grad_f(x = x0, shares = shares))) {
     if (count > x0_n_tries) {
-      #stop('Error: Could not find an initial value x0 which is defined by eval_f and/or eval_grad_f. Either increase x0_n_tries (defaul: 100), or increase the parameter space with the bounds argument')
-      warning('Warning: Could not find an initial value x0 which is defined by eval_f and/or eval_grad_f. Either increase x0_n_tries (defaul: 100), or increase the parameter space with the bounds argument. Q&D solution: x0 is set to 1')
-      x0 <- 1
+
+      if (count2 == 1) {
+        stop('Error: Could not find an initial value x0 which is defined by eval_f and/or eval_grad_f. \n
+                You have different options:\n
+                1. increase the lower bound for the shares (under which all shares are excluded). E.g. shares_lb = 1E-3 \n
+                2. increase x0_n_tries (default: 100)\n
+                3. increase the parameter space with the bounds argument (e.g. bounds = c(1E-5, 1E4). Note: might take longer.\n
+                If none works, rise an issue on Github. ')
+        break
+      }
+
+      #warning('Warning: Could not find an initial value x0 which is defined by eval_f and/or eval_grad_f. Either increase x0_n_tries (defaul: 100), or increase the parameter space with the bounds argument. Q&D solution: x0 is set to 1')
+      #x0 <- 1
 
       # remove all very small shares
-      shares[shares < shares_lb]
+      shares <- shares[shares > shares_lb]
+      # rescale to 1
+      shares <- shares/sum(shares)
 
-      break
+      count <- 0
+      count2 <- 1
+
     } else {
       x0 <- runif(1, min = lb, max = ub)
       count <- count + 1
