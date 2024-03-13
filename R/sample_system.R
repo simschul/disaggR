@@ -144,6 +144,20 @@ generate_sampling_fun2 <- function(data,
 
 
 
+#' Title
+#'
+#' @param n
+#' @param data
+#' @param x
+#' @param alpha
+#' @param beta
+#' @param y
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
 sample_system <- function(n,
                           data,
                           x = 'x',
