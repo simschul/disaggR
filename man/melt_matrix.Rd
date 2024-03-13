@@ -4,7 +4,7 @@
 \alias{melt_matrix}
 \title{Melt a matrix into a long data.table}
 \usage{
-melt_matrix(x)
+melt_matrix(x, remove_zero = TRUE, remove_non_finite = TRUE)
 }
 \arguments{
 \item{x}{A matrix that will be converted into a long format data.table.}
