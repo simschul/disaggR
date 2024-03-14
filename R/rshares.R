@@ -85,7 +85,10 @@ rdir <- function(n, alpha, gamma) {
 #' (derived from: https://en.wikipedia.org/wiki/Gamma_distribution#Mean_and_variance)
 #'
 #'
-#' See `?rgamma`: "Note that for smallish values of shape (and moderate scale) a large parts of the mass of the Gamma distribution is on values of x so near zero that they will be represented as zero in computer arithmetic. So rgamma may well return values which will be represented as zero."
+#' See `?rgamma`: "Note that for smallish values of shape (and moderate scale) a
+#' large parts of the mass of the Gamma distribution is on values of x so
+#' near zero that they will be represented as zero in computer arithmetic.
+#' So rgamma may well return values which will be represented as zero."
 #'
 #' Note: the current implementation is rather a pragmatic workaround for this
 #' issue. Both the threshold parameter and the formula to set the `rate` parameter
@@ -117,19 +120,68 @@ rdir2 <- function(n, alpha, gamma, threshold = 1E-2) {
 }
 
 
-rshares <- function(N, alpha, beta = NULL) {
-  if (isTRUE(all.equal(var(alpha), 0)) & is.null(beta)) {
-    # Dirichlet 1
-    rdir1(N, length = length(alpha))
-  } else if (is.null(beta)) {
-    # Dirichlet MaxEnt
-    rdir_maxent(N, alpha)
-  } else if (!is.null(beta)) {
-    # Gen. Dirichlet
-    rdirg(N, alpha, beta)
-  } else {
-    stop('Case not implemented atm.')
+# rshares <- function(N, alpha, beta = NULL) {
+#   if (isTRUE(all.equal(var(alpha), 0)) & is.null(beta)) {
+#     # Dirichlet 1
+#     rdir1(N, length = length(alpha))
+#   } else if (is.null(beta)) {
+#     # Dirichlet MaxEnt
+#     rdir_maxent(N, alpha)
+#   } else if (!is.null(beta)) {
+#     # Gen. Dirichlet
+#     rdirg(N, alpha, beta)
+#   } else {
+#     stop('Case not implemented atm.')
+#   }
+# }
+
+rshares <- function(n, alpha, beta = NULL,
+                    na_action = 'remove', max_iter = 1E3) {
+  if (is.null(beta)) {
+    beta <- rep(NA, length(alpha))
+    names(beta) <- names(alpha)
   }
+  if (na_action == 'remove') {
+    beta <- beta[!is.na(alpha)]
+    alpha <- alpha[!is.na(alpha)]
+  } else if (na_action == 'fill') {
+    alpha[is.na(alpha)] <- (1 - sum(alpha, na.rm = TRUE)) / length(alpha[is.na(alpha)])
+  } else {
+    stop('na_action must be either "remove" or "fill"!')
+  }
+
+  if (sum(alpha) != 1) {
+    stop('alpha must sum to one! If you have NAs in your alpha consider setting "na_action" to "fill". ')
+  }
+
+  K <- length(alpha)
+  has_mean_only <- is.finite(alpha) & !is.finite(beta)
+  has_sd_only <- is.finite(beta) & !is.finite(alpha)
+  has_both <- is.finite(alpha) & is.finite(beta)
+
+  if (all(has_both)) {
+    # Generalised dirichlet
+    sample <- rdirg(n, alpha, beta)
+  } else {
+    sample <- matrix(0, nrow = n, ncol = K)
+    colnames(sample) <- names(alpha)
+
+    if (sum(has_both) > 0){
+      # sample all shares with both mean + sd
+      sample[, has_both] <- rbeta3(n, mean = alpha[has_both],
+                                   sd = beta[has_both], max_iter = max_iter)
+    }
+
+    if (sum(has_mean_only) > 0) {
+      # rescale alpha to sum to one
+      alpha2 <- alpha[has_mean_only] / sum(alpha[has_mean_only])
+      # sample all shares with mean only
+      sample_temp <- rdir_maxent(n, alpha2)
+      # rescale sample to make rows sum to one
+      sample[, has_mean_only] <- sample_temp * (1-rowSums(sample))
+    }
+  }
+  return(sample)
 }
 
 
