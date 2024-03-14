@@ -162,7 +162,11 @@ rshares <- function(n, alpha, beta = NULL,
   if (all(has_both)) {
     # Generalised dirichlet
     sample <- rdirg(n, alpha, beta)
+  } else if (all(has_mean_only)) {
+    # Dirichlet with maxent fitted gamma
+    sample <- rdir_maxent(N, alpha)
   } else {
+    # partial info: nested approach
     sample <- matrix(0, nrow = n, ncol = K)
     colnames(sample) <- names(alpha)
 
@@ -191,5 +195,69 @@ rshares <- function(n, alpha, beta = NULL,
 
 
 
+#' Generate random numbers from the beta distribution. Similar to `base::rbeta`, but:
+#' - vectorized
+#' - parametrised with mean and sd (derived from: https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_variance)
+#' - Ensures that the sum of the samples do not exceed 1.
+#'
+#' It is similar to a generalised Dirichlet, however the main functional difference
+#' is that the samples do NOT sum to 1 (but are <= 1).
+#'
+#' The constraint that the sample sum is <= 1 is currently achieved by sampling
+#' as long until `n` samples exist that satisfy the constraint. Depending on the
+#' parameter combination this can be quite computational intensive.
+#'
+#' Note that the beta distribution is only defined if (mean * (1-mean)) < sd^2
+#'
+#' @param n number of samples
+#' @param mean a vector of means (between 0 and 1, sum(means) <= 1)
+#' @param sda vector of standard devaitions
+#' @param fix if set to TRUE (default) the SD of all variables for which the
+#' parameter combination of mean and sd is undedefined ((mean * (1-mean)) < sd^2).
+#' If set to FALSE the function will throw an error message if there are undefined
+#' parameter combinations.
+#' @param max_iter the maximum number of iterations to sample.
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#'
+#'
+#'
+rbeta3 <- function(n, means, sds, fix = TRUE, max_iter = 1E3) {
+  var <- sds^2
+  undef_comb <- (means * (1-means)) < var
+  if (!all(!undef_comb)) {
+    if (isTRUE(fix)) var[undef_comb] <- means[undef_comb]^2
+    else stop('The beta distribution is not defined for the
+                                    parameter combination you provided!
+                                    sd must be smaller or equal sqrt(means*(1-means))')
 
+  }
+  # from: https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_variance
+  alpha <- means * (((means * (1-means)) / var) - 1)
+  beta <- (1-means)*(((means * (1-means)) / var) - 1)
+
+  k<- length(means)
+  x <- matrix(0, nrow = n, ncol = k)
+  for (i in 1:k) {
+    x[, i] <- rbeta(n, alpha[i], beta[i])
+  }
+  larger_one <- rowSums(x) > 1
+  count <- 0
+  while(sum(larger_one) > 0) {
+    for (i in 1:k) {
+      x[larger_one, i] <- rbeta(sum(larger_one), alpha[i], beta[i])
+    }
+    larger_one <- rowSums(x) > 1
+    count <- count + 1
+    if (count > max_iter) stop('max_iter is reached. the combinations of means
+    and sds you provided does allow to generate `n` random samples that are
+                               not larger than 1. Either increase max_iter, or
+                               change parameter combination. ')
+  }
+
+  return(x)
+}
 
