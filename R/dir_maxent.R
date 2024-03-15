@@ -40,8 +40,8 @@ dirichlet_entropy <- function(x, shares) {
 #' Like `find_gamma_maxent`: Finds the Gamma value which maximises the entropy of a Dirichlet distribution
 #' with given alphas (=sector shares), using the nloptr optimazation package.
 #'
-#' BUT: including the first derivative of the Dir Entropy function `dirichlet_entropy_grad`,
-#' and thus is **much** faster than `find_gamma_maxent`.
+#' ~~BUT: including the first derivative of the Dir Entropy function `dirichlet_entropy_grad`,
+#' and thus is **much** faster than `find_gamma_maxent`.~~
 #'
 #' @param shares
 #' @param dirichlet_entropy
@@ -57,15 +57,15 @@ dirichlet_entropy <- function(x, shares) {
 #'
 #' @examples
 find_gamma_maxent2 <- function(shares,
-                               eval_f = dirichlet_entropy,
-                               eval_grad_f = dirichlet_entropy_grad,
+                               eval_f = eval_f,
+                               #eval_grad_f = dirichlet_entropy_grad,
                                x0 = 1, # initial value of gamma
                                x0_n_tries = 100,
-                               bounds = c(0.001, 300),
+                               bounds = c(0.001, 172),
                                shares_lb = 0,
                                local_opts = list( "algorithm" = "NLOPT_LD_MMA", # optim options
                                                   "xtol_rel" = 1.0e-4 ),
-                               opts = list( "algorithm"= "NLOPT_GD_STOGO",
+                               opts = list( "algorithm"= "NLOPT_GN_DIRECT",
                                             "xtol_rel"= 1.0e-4,
                                             "maxeval"= 1E3,
                                             "local_opts" = local_opts,
@@ -73,8 +73,10 @@ find_gamma_maxent2 <- function(shares,
 
 ) {
 
-  # remove shares of zero: moved to below
-  #shares <- shares[which(shares > shares_lb)]
+
+  shares <- shares[which(shares > shares_lb)]
+  shares <- shares/sum(shares)
+
 
   if (!isTRUE(all.equal(sum(shares), 1))) {
     stop('Shares must sum to 1. But `sum(shares)` gives ', sum(shares))
@@ -86,8 +88,7 @@ find_gamma_maxent2 <- function(shares,
 
   count <- 0
   count2 <- 0
-  while(!is.finite(eval_f(x = x0, shares = shares))
-        | !is.finite(eval_grad_f(x = x0, shares = shares))) {
+  while(!is.finite(eval_f(x = x0, shares = shares))) {
     if (count > x0_n_tries) {
 
       if (count2 == 1) {
@@ -120,7 +121,7 @@ find_gamma_maxent2 <- function(shares,
   # Run the optimizer
   res <- nloptr ( x0 = x0,
                   eval_f = eval_f,
-                  eval_grad_f = eval_grad_f,
+                  #eval_grad_f = eval_grad_f,
                   lb = lb,
                   ub = ub,
                   opts = opts,
