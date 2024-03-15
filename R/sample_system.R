@@ -26,11 +26,11 @@ generate_sampling_fun <- function(x, ct) {
 
     # choose dists
     dists_agg <- lapply(x, function(x) {
-      generate_distribution_agg(mean = x$mean, sd = x$sd, a = x$a, b = x$b)
+      generate_distribution_agg(mean = x$mean, sd = x$sd, min = x$min, max = x$max)
     })
 
     dists_shares <- lapply(1:nrow(ct), function(x) {
-      generate_distribution_shares(alpha = ct$alpha[[x]], beta = ct$beta[[x]])
+      generate_distribution_shares(shares = ct$shares[[x]], sds = ct$sds[[x]])
     })
 
 
@@ -56,24 +56,24 @@ generate_sampling_fun <- function(x, ct) {
 #' Title
 #'
 #' @param data a data.frame containing all input information
-#' @param alpha
-#' @param beta
+#' @param shares
+#' @param sds
 #' @param y names
-#' @param x column name of the information of the aggregate. The column must be a list of length nrow(data). Each list element itself is another list storing the information on the aggregate. The element of this inner elements must be named. Can include "mean", "sd", "a", "b" at the moment.
+#' @param x column name of the information of the aggregate. The column must be a list of length nrow(data). Each list element itself is another list storing the information on the aggregate. The element of this inner elements must be named. Can include "mean", "sd", "a", "max" at the moment.
 #'
 #' @return
 #' @export
 #'
 #' @examples
 #' data <- structure(list(x = list(list(mean = 1, sd = 0.1, a = 0), list(
-#'mean = 10, a = 0), list(a = 0, b = 20), list(mean = 20, sd = 1)),
-#'alpha = list(c(`1` = 0.1, `2` = 0.3, `3` = 0.6), c(`1` = 0.3,
+#'mean = 10, a = 0), list(a = 0, max = 20), list(mean = 20, sd = 1)),
+#'shares = list(c(`1` = 0.1, `2` = 0.3, `3` = 0.6), c(`1` = 0.3,
 #'                                                   `2` = 0.7),
 #'                                                   c(`2` = 0.333333333333333,
 #'                                                   `4` = 0.333333333333333,
 #'                                                   `5` = 0.333333333333333),
 #'                                                   c(`5` = 1)),
-#'                                                   beta = list(c(`1` = NA_real_,
+#'                                                   sds = list(c(`1` = NA_real_,
 #'                                                   `2` = NA_real_, `3` = NA_real_),
 #'                                                   c(`1` = 0.1, `2` = 0.05),
 #'                                                   c(`2` = NA_real_, `4` = NA_real_,
@@ -95,8 +95,8 @@ generate_sampling_fun <- function(x, ct) {
 
 generate_sampling_fun2 <- function(data,
                                   x = 'x',
-                                  alpha = 'alpha',
-                                  beta = 'beta',
+                                  shares = 'shares',
+                                  sds = 'sds',
                                   y = 'y') {
   # Capture the current package versions
   disaggR_version <- as.character(packageVersion("disaggR"))
@@ -116,11 +116,11 @@ generate_sampling_fun2 <- function(data,
 
     # choose dists
     dists_agg <- lapply(data[[x]], function(x) {
-      generate_distribution_agg(mean = x$mean, sd = x$sd, a = x$a, b = x$b)
+      generate_distribution_agg(mean = x$mean, sd = x$sd, min = x$min, max = x$max)
     })
 
     dists_shares <- lapply(1:nrow(data), function(x) {
-      generate_distribution_shares(alpha = data[[alpha]][[x]], beta = data[[beta]][[x]])
+      generate_distribution_shares(shares = data[[shares]][[x]], sds = data[[sds]][[x]])
     })
 
 
@@ -149,8 +149,8 @@ generate_sampling_fun2 <- function(data,
 #' @param n
 #' @param data
 #' @param x
-#' @param alpha
-#' @param beta
+#' @param shares
+#' @param sds
 #' @param y
 #' @param ...
 #'
@@ -161,8 +161,8 @@ generate_sampling_fun2 <- function(data,
 sample_system <- function(n,
                           data,
                           x = 'x',
-                          alpha = 'alpha',
-                          beta = 'beta',
+                          shares = 'shares',
+                          sds = 'sds',
                           y = 'y',
                           ...) {
 
@@ -170,14 +170,14 @@ sample_system <- function(n,
   dists_agg <- lapply(data[[x]], function(x) {
     # Check if x is a list
     if (is.list(x)) {
-      generate_distribution_agg(mean = x$mean, sd = x$sd, a = x$a, b = x$b)
+      generate_distribution_agg(mean = x$mean, sd = x$sd, min = x$min, max = x$max)
     } else if (is.numeric(x) && is.null(dim(x))) {
       x
     }
   })
 
   dists_shares <- lapply(1:nrow(data), function(x) {
-    generate_distribution_shares(alpha = data[[alpha]][[x]], beta = data[[beta]][[x]],
+    generate_distribution_shares(shares = data[[shares]][[x]], sds = data[[sds]][[x]],
                                  ...)
   })
 

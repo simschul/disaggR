@@ -26,7 +26,7 @@ beta2 <- function(alpha) {
 
 
 # Objective Function
-eval_f <- function(x, shares) {
+dirichlet_entropy <- function(x, shares) {
   # from:  https://en.wikipedia.org/wiki/Dirichlet_distribution#Entropy
   # calculates the negative entropy of a dirichlet distribution given `shares` (sum to 1) and a concentration parameter `x`, so that `alpha = shares * x`
   alpha <- x * shares
@@ -44,11 +44,11 @@ eval_f <- function(x, shares) {
 #' and thus is **much** faster than `find_gamma_maxent`.
 #'
 #' @param shares
-#' @param eval_f
+#' @param dirichlet_entropy
 #' @param eval_grad_f
-#' @param x0 initial value. If not defined by eval_f and/or eval_grad_f there is a automatical procedure to find a valid initial value within the `bounds`. If none is found, the `shares_lb` arguments is used to remove all shares below that threshold (default is 0)
+#' @param x0 initial value. If not defined by dirichlet_entropy and/or eval_grad_f there is a automatical procedure to find a valid initial value within the `bounds`. If none is found, the `shares_lb` arguments is used to remove all shares below that threshold (default is 0)
 #' @param bounds
-#' @param shares_lb lower bound of shares. Only is of relevance if no starting value x0 could found be which is defined by eval_f and/or eval_grad_f. set this to e.g. 1E-4) to increase chance of convergence
+#' @param shares_lb lower bound of shares. Only is of relevance if no starting value x0 could found be which is defined by dirichlet_entropy and/or eval_grad_f. set this to e.g. 1E-4) to increase chance of convergence
 #' @param local_opts
 #' @param opts
 #'
@@ -57,7 +57,7 @@ eval_f <- function(x, shares) {
 #'
 #' @examples
 find_gamma_maxent2 <- function(shares,
-                               eval_f = eval_f,
+                               eval_f = dirichlet_entropy,
                                eval_grad_f = dirichlet_entropy_grad,
                                x0 = 1, # initial value of gamma
                                x0_n_tries = 100,

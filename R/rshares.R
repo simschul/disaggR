@@ -35,41 +35,42 @@ rdir1 <- function(N, length) {
 rdirg <- function(n, alpha, beta) {
 
   if (!isTRUE(all.equal(names(alpha), names(beta)))) {
-    stop('alpha and beta need to have the same column names. can also be both NULL')
+    stop('shares and beta need to have the same column names. can also be both NULL')
   }
 
-  alpha2 <- (alpha / beta) ^ 2
-  beta2 <- alpha / (beta) ^ 2
+  alpha2 <- (shares / beta) ^ 2
+  beta2 <- shares / (beta) ^ 2
   k <- length(alpha2)
   x <- matrix(0, nrow = n, ncol = k)
   for (i in 1:k) {
     x[, i] <- rgamma(n, shape = alpha2[i], rate = beta2[i])
   }
   sample <- x / rowSums(x)
-  colnames(sample) <- names(alpha)
+  colnames(sample) <- names(shares)
   return(sample)
 }
 
 #' Random Dirichlet distrubted numbers.
 #' Adds the gamma parameter compared to the standardt Dir variant.
 #' @param n
-#' @param alpha
+#' @param shares
 #' @param gamma
 #'
 #' @return
 #' @export
 #'
 #' @examples
-rdir <- function(n, alpha, gamma) {
-  sample <- gtools::rdirichlet(n, alpha * gamma)
-  colnames(sample) <- names(alpha)
+rdir <- function(n, shares, gamma) {
+  sample <- gtools::rdirichlet(n, shares * gamma)
+  colnames(sample) <- names(shares)
   return(sample)
 
 }
 
 #' Similar to `rdir` but adding a threshold argument.
-#' For all variables `i` with an alpha below that threshold, the `rate` argument of
-#' the `rgamma` functions is set to `1 / alpha[i]`, and `shape` is set `1`. This ensures less extreme values
+#' For all variables `i` with an shares below that threshold, the `rate` argument of
+#' the `rgamma` functions is set to `1 / shares[i]`, and `shape` is set `1`.
+#' This ensures less extreme values
 #' for those variables which presumably originate from the know issues of
 #' generating random gamma distributed number with a very small `shape` parameter.
 #'
@@ -96,7 +97,7 @@ rdir <- function(n, alpha, gamma) {
 #' mean are affected this shouldn't affect overall results too much.
 #'
 #' @param n
-#' @param alpha
+#' @param shares
 #' @param gamma
 #' @param threshold
 #'
@@ -104,8 +105,8 @@ rdir <- function(n, alpha, gamma) {
 #' @export
 #'
 #' @examples
-rdir2 <- function(n, alpha, gamma, threshold = 1E-2) {
-  alpha <- gamma * alpha
+rdir2 <- function(n, shares, gamma, threshold = 1E-2) {
+  alpha <- gamma * shares
   l <- length(alpha)
   rate <- rep(1, l)
   #rate[alpha < threshold] <- sqrt(1/alpha[alpha < threshold])
@@ -113,6 +114,33 @@ rdir2 <- function(n, alpha, gamma, threshold = 1E-2) {
   alpha[alpha < threshold] <- 1
   x <- matrix(rgamma(l * n, alpha, rate), ncol = l, byrow = TRUE)
   # x <- matrix(rgamma2(n, alpha, rate), ncol = l, byrow = FALSE)
+  sm <- rowSums(x)
+  sample <- x/sm
+  colnames(sample) <- names(alpha)
+  return(sample)
+}
+
+#' Functions to generate random deviates from the Dirichlet distribution.
+#'
+#' Like `gtools::rdirichlet`, but with an adjustment when `alpha` contains small
+#' values below a given `threshold`.
+#'
+#' Details see `?rdir2`.
+#'
+#' @param n
+#' @param alpha
+#' @param threshold
+#'
+#' @return
+#' @export
+#'
+#' @examples
+rdirichlet <- function(n, alpha, threshold = 1E-2) {
+  l <- length(alpha)
+  rate <- rep(1, l)
+  rate[alpha < threshold] <- 1 / alpha[alpha < threshold]
+  alpha[alpha < threshold] <- 1
+  x <- matrix(rgamma(l * n, alpha, rate), ncol = l, byrow = TRUE)
   sm <- rowSums(x)
   sample <- x/sm
   colnames(sample) <- names(alpha)
@@ -135,54 +163,54 @@ rdir2 <- function(n, alpha, gamma, threshold = 1E-2) {
 #   }
 # }
 
-rshares <- function(n, alpha, beta = NULL,
+rshares <- function(n, shares, sds = NULL,
                     na_action = 'remove', max_iter = 1E3) {
-  if (is.null(beta)) {
-    beta <- rep(NA, length(alpha))
-    names(beta) <- names(alpha)
+  if (is.null(sds)) {
+    sds <- rep(NA, length(shares))
+    names(sds) <- names(shares)
   }
   if (na_action == 'remove') {
-    beta <- beta[!is.na(alpha)]
-    alpha <- alpha[!is.na(alpha)]
+    sds <- sds[!is.na(shares)]
+    shares <- shares[!is.na(shares)]
   } else if (na_action == 'fill') {
-    alpha[is.na(alpha)] <- (1 - sum(alpha, na.rm = TRUE)) / length(alpha[is.na(alpha)])
+    shares[is.na(shares)] <- (1 - sum(shares, na.rm = TRUE)) / length(shares[is.na(shares)])
   } else {
     stop('na_action must be either "remove" or "fill"!')
   }
 
-  if (sum(alpha) != 1) {
-    stop('alpha must sum to one! If you have NAs in your alpha consider setting "na_action" to "fill". ')
+  if (sum(shares) != 1) {
+    stop('shares must sum to one! If you have NAs in your shares consider setting "na_action" to "fill". ')
   }
 
-  K <- length(alpha)
-  has_mean_only <- is.finite(alpha) & !is.finite(beta)
-  has_sd_only <- is.finite(beta) & !is.finite(alpha)
-  has_both <- is.finite(alpha) & is.finite(beta)
+  K <- length(shares)
+  have_mean_only <- is.finite(shares) & !is.finite(sds)
+  have_sd_only <- is.finite(sds) & !is.finite(shares)
+  have_both <- is.finite(shares) & is.finite(sds)
 
-  if (all(has_both)) {
+  if (all(have_both)) {
     # Generalised dirichlet
-    sample <- rdirg(n, alpha, beta)
-  } else if (all(has_mean_only)) {
+    sample <- rdirg(n, shares, sds)
+  } else if (all(have_mean_only)) {
     # Dirichlet with maxent fitted gamma
-    sample <- rdir_maxent(N, alpha)
+    sample <- rdir_maxent(N, shares)
   } else {
     # partial info: nested approach
     sample <- matrix(0, nrow = n, ncol = K)
-    colnames(sample) <- names(alpha)
+    colnames(sample) <- names(shares)
 
-    if (sum(has_both) > 0){
+    if (sum(have_both) > 0){
       # sample all shares with both mean + sd
-      sample[, has_both] <- rbeta3(n, mean = alpha[has_both],
-                                   sd = beta[has_both], max_iter = max_iter)
+      sample[, have_both] <- rbeta3(n, mean = shares[have_both],
+                                   sd = sds[have_both], max_iter = max_iter)
     }
 
-    if (sum(has_mean_only) > 0) {
-      # rescale alpha to sum to one
-      alpha2 <- alpha[has_mean_only] / sum(alpha[has_mean_only])
+    if (sum(have_mean_only) > 0) {
+      # rescale shares to sum to one
+      alpha2 <- shares[have_mean_only] / sum(shares[have_mean_only])
       # sample all shares with mean only
       sample_temp <- rdir_maxent(n, alpha2)
       # rescale sample to make rows sum to one
-      sample[, has_mean_only] <- sample_temp * (1-rowSums(sample))
+      sample[, have_mean_only] <- sample_temp * (1-rowSums(sample))
     }
   }
   return(sample)
@@ -210,10 +238,10 @@ rshares <- function(n, alpha, beta = NULL,
 #' Note that the beta distribution is only defined if (mean * (1-mean)) < sd^2
 #'
 #' @param n number of samples
-#' @param mean a vector of means (between 0 and 1, sum(means) <= 1)
-#' @param sda vector of standard devaitions
+#' @param shares a vector of shares (between 0 and 1, sum(means) <= 1)
+#' @param sds vector of standard devaitions of the shares.
 #' @param fix if set to TRUE (default) the SD of all variables for which the
-#' parameter combination of mean and sd is undedefined ((mean * (1-mean)) < sd^2).
+#' parameter combination of shares and sd is undedefined ((shares * (1-shares)) < sd^2).
 #' If set to FALSE the function will throw an error message if there are undefined
 #' parameter combinations.
 #' @param max_iter the maximum number of iterations to sample.
@@ -225,21 +253,21 @@ rshares <- function(n, alpha, beta = NULL,
 #'
 #'
 #'
-rbeta3 <- function(n, means, sds, fix = TRUE, max_iter = 1E3) {
+rbeta3 <- function(n, shares, sds, fix = TRUE, max_iter = 1E3) {
   var <- sds^2
-  undef_comb <- (means * (1-means)) < var
+  undef_comb <- (shares * (1-shares)) < var
   if (!all(!undef_comb)) {
-    if (isTRUE(fix)) var[undef_comb] <- means[undef_comb]^2
+    if (isTRUE(fix)) var[undef_comb] <- shares[undef_comb]^2
     else stop('The beta distribution is not defined for the
                                     parameter combination you provided!
-                                    sd must be smaller or equal sqrt(means*(1-means))')
+                                    sd must be smaller or equal sqrt(shares*(1-shares))')
 
   }
   # from: https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_variance
-  alpha <- means * (((means * (1-means)) / var) - 1)
-  beta <- (1-means)*(((means * (1-means)) / var) - 1)
+  alpha <- shares * (((shares * (1-shares)) / var) - 1)
+  beta <- (1-shares)*(((shares * (1-shares)) / var) - 1)
 
-  k<- length(means)
+  k<- length(shares)
   x <- matrix(0, nrow = n, ncol = k)
   for (i in 1:k) {
     x[, i] <- rbeta(n, alpha[i], beta[i])
@@ -252,7 +280,7 @@ rbeta3 <- function(n, means, sds, fix = TRUE, max_iter = 1E3) {
     }
     larger_one <- rowSums(x) > 1
     count <- count + 1
-    if (count > max_iter) stop('max_iter is reached. the combinations of means
+    if (count > max_iter) stop('max_iter is reached. the combinations of shares
     and sds you provided does allow to generate `n` random samples that are
                                not larger than 1. Either increase max_iter, or
                                change parameter combination. ')

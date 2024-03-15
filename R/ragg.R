@@ -1,21 +1,20 @@
-ragg <- function(N, mu_0, sd_0 = NULL, a = 0, b = Inf) {
-  if (!is.null(mu_0) & !is.null(sd_0) & a == -Inf & b == Inf) {
+ragg <- function(N, mean, sd = NULL, min = 0, max = Inf) {
+  if (!is.null(mean) & !is.null(sd) & min == -Inf & max == Inf) {
     # Normal distribution
-    rnorm(N, mu_0, sd_0)
-  } else if (!is.null(mu_0) & !is.null(sd_0)) {
+    rnorm(N, mean, sd)
+  } else if (!is.null(mean) & !is.null(sd)) {
     # Truncated normal
-    rtruncnorm(N, a = a, b = b, mean = mu_0, sd = sd_0)
-  } else if (!is.null(mu_0) & is.null(sd_0) & a == 0 & b == Inf) {
+    rtruncnorm(N, a = min, b = max, mean = mean, sd = sd)
+  } else if (!is.null(mean) & is.null(sd) & min == 0 & max == Inf) {
     # Exponential
-    rexp(N, rate = 1 / mu_0)
-  } else if (is.null(mu_0) & is.null(sd_0) & is.finite(a) & is.finite(b)) {
+    rexp(N, rate = 1 / mean)
+  } else if (is.null(mean) & is.null(sd) & is.finite(min) & is.finite(max)) {
     # uniform
-    runif(N, min = a, max = b)
+    runif(N, min = min, max = max)
   } else {
     stop('Case not implemented atm.')
   }
-
 }
-# ragg(N = 100, mu_0 = 1) %>% hist
-# ragg(N = 100, mu_0 = 1, sd = 0.5) %>% hist
-# ragg(N = 100, mu_0 = 1, sd_0 = 0.5, a = -Inf) %>% hist
+# ragg(N = 100, mean = 1) %>% hist
+# ragg(N = 100, mean = 1, sd = 0.5) %>% hist
+# ragg(N = 100, mean = 1, sd = 0.5, min = -Inf) %>% hist

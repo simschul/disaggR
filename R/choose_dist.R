@@ -2,14 +2,14 @@
 #' Choose an Appropriate Distribution Based on Aggregated Statistics
 #'
 #' This function selects an appropriate distribution based on the input mean, standard deviation,
-#' and boundary parameters 'a' and 'b'. It handles various cases and constraints for the parameters,
+#' and boundary parameters 'min' and 'max'. It handles various cases and constraints for the parameters,
 #' providing warnings and defaulting values as necessary. It aims to guide the user towards a suitable
 #' distribution choice based on the provided statistics.
 #'
 #' @param mean The mean of the distribution, can be NULL or NA.
 #' @param sd The standard deviation of the distribution, can be NULL or NA.
-#' @param a The lower bound of the distribution, can be NULL or NA.
-#' @param b The upper bound of the distribution, can be NULL or NA.
+#' @param min The lower bound of the distribution, can be NULL or NA.
+#' @param max The upper bound of the distribution, can be NULL or NA.
 #'
 #' @return A character string indicating the type of distribution selected based on the inputs,
 #' or NA if the input values do not allow for a proper distribution choice.
@@ -18,49 +18,49 @@
 #'
 #' @examples
 #' # To choose a distribution with known mean and standard deviation:
-#' dist_type <- choose_dist_agg(mean = 5, sd = 2, a = NULL, b = NULL)
+#' dist_type <- choose_dist_agg(mean = 5, sd = 2, min = NULL, max = NULL)
 
 
-choose_dist_agg <- function(mean, sd, a, b) {
+choose_dist_agg <- function(mean, sd, min, max) {
   if (is.null(mean)) mean <- NA
   if (is.null(sd)) sd <- NA
-  if (is.null(a)) a <- NA
-  if (is.null(b)) b <- NA
+  if (is.null(min)) min <- NA
+  if (is.null(max)) max <- NA
 
-  if (is.finite(a) & is.finite(b) & a >= b) {
-    warning('a must be < b')
+  if (is.finite(min) & is.finite(max) & min >= max) {
+    warning('min must be < max')
     return(NA)
   }
   if (is.finite(sd) & sd <=0) {
     warning('sd must be positive')
     return(NA)
   }
-  if (is.finite(mean) & is.finite(a) & mean <= a) {
-    warning('mean must be > a')
+  if (is.finite(mean) & is.finite(min) & mean <= min) {
+    warning('mean must be > min')
     return(NA)
   }
-  if (is.finite(mean) & is.finite(b) & mean >= b) {
-    warning('mean must be < b')
+  if (is.finite(mean) & is.finite(max) & mean >= max) {
+    warning('mean must be < max')
     return(NA)
   }
 
   if (is.finite(mean)) {
     if (is.finite(sd)) {
-      if (is.finite(a) | is.finite(b)) {
+      if (is.finite(min) | is.finite(max)) {
         # return(generate_distribution('rtruncnorm', mean = mean, sd = sd,
-        #                              a = a, b = b))
+        #                              min = min, max = max))
 
         return('truncnorm')
       } else {
         # return(generate_distribution('rnorm', mean = mean, sd = sd))
         return('norm')
       }
-    } else if (isTRUE(all.equal(a, 0)) & !is.finite(b)) {
+    } else if (isTRUE(all.equal(min, 0)) & !is.finite(max)) {
       return('exp')
     } else {
       return(NA)
     }
-  } else if (is.finite(a) & is.finite(b) & !is.finite(sd)) {
+  } else if (is.finite(min) & is.finite(max) & !is.finite(sd)) {
     return('unif')
   } else {
     NA
@@ -69,11 +69,11 @@ choose_dist_agg <- function(mean, sd, a, b) {
 
 #' Choose an Appropriate Disaggregated Distribution
 #'
-#' This function determines the appropriate disaggregated distribution type based on alpha and beta parameters.
+#' This function determines the appropriate disaggregated distribution type based on shares and sds parameters.
 #' It considers various scenarios and constraints related to the input parameters to select from specific distribution types.
 #'
-#' @param alpha A numeric vector representing the alpha parameter(s) for the distribution.
-#' @param beta A numeric vector representing the beta parameter(s) for the distribution, can be NULL or NA.
+#' @param shares A numeric vector representing the shares parameter(s) for the distribution.
+#' @param sds A numeric vector representing the sds parameter(s) for the distribution, can be NULL or NA.
 #'
 #' @return A character string indicating the type of disaggregated distribution selected based on the inputs,
 #' Possible return values include 'dir1' for Dirichlet 1, 'dir_maxent' for Dirichlet Maximum Entropy, 'gdir' for Generalized Dirichlet,
@@ -81,18 +81,18 @@ choose_dist_agg <- function(mean, sd, a, b) {
 #' @export
 #'
 #' @examples
-#' # To determine a distribution with known alpha values:
-#' dist_type <- choose_dist_disagg(alpha = c(1,2,3), beta = NULL)
-choose_dist_disagg <- function(alpha, beta) {
-  if (all(is.na(beta))) beta <- NULL
+#' # To determine a distribution with known shares values:
+#' dist_type <- choose_dist_disagg(shares = c(1,2,3), sds = NULL)
+choose_dist_disagg <- function(shares, sds) {
+  if (all(is.na(sds))) sds <- NULL
 
-  if (isTRUE(all.equal(var(alpha), 0)) & is.null(beta)) {
+  if (isTRUE(all.equal(var(shares), 0)) & is.null(sds)) {
     # Dirichlet 1
     return('dir1')
-  } else if (is.null(beta)) {
+  } else if (is.null(sds)) {
     # Dirichlet MaxEnt
     return('dir_maxent')
-  } else if (!is.null(beta)) {
+  } else if (!is.null(sds)) {
     # Gen. Dirichlet
     return('gdir')
   } else {
@@ -109,7 +109,7 @@ choose_dist_disagg <- function(alpha, beta) {
 #'
 #' @param fun The distribution function to be generated (runif, rnorm, rlnorm, rweibull, rdir, etc.).
 #' @param ... Additional parameters for the distribution function such as mean, sd for normal distribution,
-#'        or alpha for dirichlet distribution. Supports named vectors for parameter values.
+#'        or shares for dirichlet distribution. Supports named vectors for parameter values.
 #' @return A new function that takes a single argument 'n' and returns a sample of size 'n' from the specified distribution.
 #'         The function is self-contained and includes all necessary parameters as part of its definition.
 #' @examples
@@ -117,8 +117,8 @@ choose_dist_disagg <- function(alpha, beta) {
 #' my_normal <- generate_distribution(rnorm, mean = 10, sd = 2)
 #' sample <- my_normal(100)  # Generate 100 samples
 #'
-#' # Generate a dirichlet distribution function with named alpha vector
-#' my_dirichlet <- generate_distribution(rdir, alpha = c('3' = 1))
+#' # Generate a dirichlet distribution function with named shares vector
+#' my_dirichlet <- generate_distribution(rdir, shares = c('3' = 1))
 #' sample <- my_dirichlet(50)  # Generate 50 samples
 #'
 #' @export
@@ -210,8 +210,8 @@ generate_distribution <- function(fun, ...) {
 #'
 #' @param mean The mean for the distribution, default is NA.
 #' @param sd The standard deviation for the distribution, default is NA.
-#' @param a The lower boundary for the distribution, default is -Inf.
-#' @param b The upper boundary for the distribution, default is Inf.
+#' @param min The lower boundary for the distribution, default is -Inf.
+#' @param max The upper boundary for the distribution, default is Inf.
 #'
 #' @return A random sample from the chosen aggregated distribution or a stop message if no suitable distribution is found.
 #' @export
@@ -219,19 +219,19 @@ generate_distribution <- function(fun, ...) {
 #' @examples
 #' # Generate a distribution with specified mean and sd:
 #' sample <- generate_distribution_agg(mean = 5, sd = 2)
-generate_distribution_agg <- function(mean = NA, sd = NA, a = -Inf, b = Inf) {
-  dist <- choose_dist_agg(mean = mean, sd = sd, a = a, b= b)
+generate_distribution_agg <- function(mean = NA, sd = NA, min = -Inf, max = Inf) {
+  dist <- choose_dist_agg(mean = mean, sd = sd, min = min, max= max)
 
   if (dist == 'truncnorm') {
-    if (is.null(a) || is.na(a)) a <- -Inf
-    if (is.null(b) || is.na(b)) b <- Inf
-    return(generate_distribution(rtruncnorm, mean = mean, sd = sd, a= a, b=b))
+    if (is.null(min) || is.na(min)) min <- -Inf
+    if (is.null(max) || is.na(max)) max <- Inf
+    return(generate_distribution(rtruncnorm, mean = mean, sd = sd, a= min, b=max))
   } else if (dist == 'norm') {
     return(generate_distribution(rnorm, mean = mean, sd = sd))
   } else if (dist == 'exp') {
     return(generate_distribution(rexp, rate = 1/mean))
   } else if (dist == 'unif') {
-    return(generate_distribution(runif, min = a, max = b))
+    return(generate_distribution(runif, min = min, max = max))
   } else {
     stop('no distribution found for parameter combintaion')
   }
@@ -239,24 +239,24 @@ generate_distribution_agg <- function(mean = NA, sd = NA, a = -Inf, b = Inf) {
 
 #' Title
 #'
-#' @param alpha
-#' @param beta
+#' @param shares
+#' @param sds
 #' @param ...
 #'
 #' @return
 #' @export
 #'
 #' @examples
-generate_distribution_shares <- function(alpha, beta, ...) {
-  dist <- choose_dist_disagg(alpha = alpha, beta = beta)
+generate_distribution_shares <- function(shares, sds, ...) {
+  dist <- choose_dist_disagg(shares = shares, sds = sds)
 
   if (dist == 'dir1') {
-    return(generate_distribution(rdir, alpha = alpha, gamma = length(alpha)))
+    return(generate_distribution(rdir, shares = shares, gamma = length(shares)))
   } else if (dist == 'dir_maxent') {
-    out <- find_gamma_maxent2(alpha, eval_f = eval_f, ...)
-    return(generate_distribution(rdir, alpha = alpha, gamma = out$solution))
+    out <- find_gamma_maxent2(shares, eval_f = eval_f, ...)
+    return(generate_distribution(rdir, shares = shares, gamma = out$solution))
   } else if (dist == 'gdir') {
-    return(generate_distribution(rdirg, alpha = alpha, beta = beta))
+    return(generate_distribution(rdirg, shares = shares, sds = sds))
   } else {
     stop('no distribution found for parameter combintaion')
   }
