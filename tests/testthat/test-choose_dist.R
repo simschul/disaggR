@@ -37,7 +37,7 @@ test_that("Parameters are passed and used correctly", {
   set.seed(123)
 
   # Test changing parameters and seeing effect on the distribution
-  test_norm1 <- generate_distribution(rnorm, mean = 0, sd = 1)
+  # test_norm1 <- generate_distribution(rnorm, mean = 0, sd = 1)
   test_norm2 <- generate_distribution(rnorm, mean = 50, sd = 10)
 
   sample1 <- test_norm1(1000)

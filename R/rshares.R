@@ -1,13 +1,41 @@
+#' Generate random numbers from Dirichlet distribution. The concenctration parameter
+#' $\gamma$ (or sometimes also noted $\alpha_0$) is estimated based on the
+#' the maximum entropy principle.
+#'
+#' See: `?find_gamma_maxent2`
+#'
+#' @param N number of samples
+#' @param shares Vector containing a best-guess (mean) values for the shares. Must sum to 1!
+#' @param ... other parameters passed to `find_gamma_maxent2`
+#'
+#' @return a matrix with n rows and length(shares) cols, each containting a single Dirichlet random deviate
+#' @export
+#'
+#' @examples
 rdir_maxent <- function(N, shares, ...) {
-  out <- find_gamma_maxent2(shares, eval_f = eval_f, ...)
+  out <- find_gamma_maxent2(shares, eval_f = dirichlet_entropy, ...)
   #sample <- gtools::rdirichlet(N, shares * out$solution)
-  sample <- rdir2(N, alpha = shares, gamma = out$solution)
-  #attr(sample, 'nloptr') <- out
+  sample <- rdir(N, alpha = shares, gamma = out$solution)
+  colnames(sample) <- names(shares)
   return(sample)
 }
 
+
+
+#' Generate uniform random number from a Dirichlet distribution.
+#' Uniform means each alpha is 1:https://en.wikipedia.org/wiki/Dirichlet_distribution#When_each_alpha_is_1
+#'
+#'
+#' @param N number of samples
+#' @param length the number of variables
+#'
+#' @return a matrix with n rows and `length` cols, each containing a single Dirichlet random deviate
+#' @export
+#'
+#' @examples
 rdir1 <- function(N, length) {
   sample <- rdirichlet(N, rep(1, length))
+  colnames(sample) <- names(shares)
   return(sample)
 }
 
@@ -22,24 +50,26 @@ rdir1 <- function(N, length) {
 #   return(x / rowSums(x))
 # }
 
-#' Title
+#' Generate uniform random number from a Generalised Dirichlet distribution.
 #'
-#' @param n
-#' @param alpha
-#' @param beta
+#' @param n sample size
+#' @param shares Vector containing a best-guess (mean) values for the shares. Must sum to 1!
+#' @param sds Vector of same length as `shares` containing the SDs of the shares.
+#'
+#' @references Plessis, Sylvain, Nathalie Carrasco, and Pascal Pernot. “Knowledge-Based Probabilistic Representations of Branching Ratios in Chemical Networks: The Case of Dissociative Recombinations.” The Journal of Chemical Physics 133, no. 13 (October 7, 2010): 134110. https://doi.org/10.1063/1.3479907.
 #'
 #' @return
 #' @export
 #'
 #' @examples
-rdirg <- function(n, alpha, beta) {
+rdirg <- function(n, shares, sds) {
 
-  if (!isTRUE(all.equal(names(alpha), names(beta)))) {
-    stop('shares and beta need to have the same column names. can also be both NULL')
+  if (!isTRUE(all.equal(names(shares), names(sds)))) {
+    stop('shares and sds need to have the same column names. can also be both NULL')
   }
 
-  alpha2 <- (shares / beta) ^ 2
-  beta2 <- shares / (beta) ^ 2
+  alpha2 <- (shares / sds) ^ 2
+  beta2 <- shares / (sds) ^ 2
   k <- length(alpha2)
   x <- matrix(0, nrow = n, ncol = k)
   for (i in 1:k) {
@@ -50,24 +80,25 @@ rdirg <- function(n, alpha, beta) {
   return(sample)
 }
 
-#' Random Dirichlet distrubted numbers.
-#' Adds the gamma parameter compared to the standardt Dir variant.
+#' Random Dirichlet distributed numbers.
+#' Adds the gamma parameter compared to the standard Dir variant.
 #' @param n
-#' @param shares
+#' @param shares vector containing a best-guess (mean) values for the shares. Must sum to 1!
 #' @param gamma
 #'
 #' @return
 #' @export
 #'
-#' @examples
-rdir <- function(n, shares, gamma) {
-  sample <- gtools::rdirichlet(n, shares * gamma)
-  colnames(sample) <- names(shares)
-  return(sample)
+#' #' @examples
+#' rdir <- function(n, shares, gamma) {
+#'   sample <- gtools::rdirichlet(n, shares * gamma)
+#'   colnames(sample) <- names(shares)
+#'   return(sample)
+#'
+#' }
 
-}
-
-#' Similar to `rdir` but adding a threshold argument.
+#' Create Random Dirichlet distributed numbers.
+#' Adds the gamma parameter compared to the standard Dir variant.
 #' For all variables `i` with an shares below that threshold, the `rate` argument of
 #' the `rgamma` functions is set to `1 / shares[i]`, and `shape` is set `1`.
 #' This ensures less extreme values
@@ -97,7 +128,7 @@ rdir <- function(n, shares, gamma) {
 #' mean are affected this shouldn't affect overall results too much.
 #'
 #' @param n
-#' @param shares
+#' @param shares vector containing a best-guess (mean) values for the shares. Must sum to 1!
 #' @param gamma
 #' @param threshold
 #'
@@ -105,7 +136,7 @@ rdir <- function(n, shares, gamma) {
 #' @export
 #'
 #' @examples
-rdir2 <- function(n, shares, gamma, threshold = 1E-2) {
+rdir <- function(n, shares, gamma, threshold = 1E-2) {
   alpha <- gamma * shares
   l <- length(alpha)
   rate <- rep(1, l)
@@ -125,7 +156,10 @@ rdir2 <- function(n, shares, gamma, threshold = 1E-2) {
 #' Like `gtools::rdirichlet`, but with an adjustment when `alpha` contains small
 #' values below a given `threshold`.
 #'
-#' Details see `?rdir2`.
+#' Basically the same as `rdir`, but keeping the parametrisation of `gtools::rdirichlet`
+#' to allow easy switching between the two.
+#'
+#' Details see `?rdir`.
 #'
 #' @param n
 #' @param alpha
@@ -163,8 +197,29 @@ rdirichlet <- function(n, alpha, threshold = 1E-2) {
 #   }
 # }
 
+#' Generate random shares based on the information provided.
+#' Samples alyways sum to 1.
+#'
+#' Compared to generalised Dirichlet the function can handle mixed information,
+#' e.g. SDs/means only for some of the shares.
+#'
+#' The function uses a nested sampling approach:
+#' 1. sample those shares for which both, mean and SD is available (either from generalised Dirichlet `dirg()` if mean and sd are given for ALL shares, or from beta distiributions `rbeta3()` when mean and sd are only given for some shares.)
+#' 2. sample reminder from standard dirichlet with gamma fitted to MaxEnt (`rdir_maxent`)
+#'
+#' @param n sample size
+#' @param shares vector containing a best-guess (mean) values for the shares. Can contain NA's if no information is available.
+#' @param sds Vector of same length as `shares` containing the SDs of the shares. Can contain NA's if no information is available.
+#' @param na_action what to do with NA's in the `shares` argument. "fill" (default) fills them proportional with the difference `1-sum(shares)`. "remove" removes them from the vector.
+#' @param max_iter see `?rbeta3`
+#' @param ... other argeuments passed to `rbeta3`
+#'
+#' @return
+#' @export
+#'
+#' @examples
 rshares <- function(n, shares, sds = NULL,
-                    na_action = 'remove', max_iter = 1E3) {
+                    na_action = 'fill', max_iter = 1E3, ...) {
   if (is.null(sds)) {
     sds <- rep(NA, length(shares))
     names(sds) <- names(shares)
