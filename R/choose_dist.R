@@ -253,7 +253,7 @@ generate_distribution_shares <- function(shares, sds, ...) {
   if (dist == 'dir1') {
     return(generate_distribution(rdir, shares = shares, gamma = length(shares)))
   } else if (dist == 'dir_maxent') {
-    out <- find_gamma_maxent2(shares, eval_f = eval_f, ...)
+    out <- find_gamma_maxent2(shares, eval_f = dirichlet_entropy, ...)
     return(generate_distribution(rdir, shares = shares, gamma = out$solution))
   } else if (dist == 'gdir') {
     return(generate_distribution(rdirg, shares = shares, sds = sds))

@@ -4,16 +4,16 @@
 \alias{choose_dist_agg}
 \title{Choose an Appropriate Distribution Based on Aggregated Statistics}
 \usage{
-choose_dist_agg(mean, sd, a, b)
+choose_dist_agg(mean, sd, min, max)
 }
 \arguments{
 \item{mean}{The mean of the distribution, can be NULL or NA.}
 
 \item{sd}{The standard deviation of the distribution, can be NULL or NA.}
 
-\item{a}{The lower bound of the distribution, can be NULL or NA.}
+\item{min}{The lower bound of the distribution, can be NULL or NA.}
 
-\item{b}{The upper bound of the distribution, can be NULL or NA.}
+\item{max}{The upper bound of the distribution, can be NULL or NA.}
 }
 \value{
 A character string indicating the type of distribution selected based on the inputs,
@@ -22,11 +22,11 @@ Possible return values include 'truncnorm', 'norm', 'exp', 'unif', or NA.
 }
 \description{
 This function selects an appropriate distribution based on the input mean, standard deviation,
-and boundary parameters 'a' and 'b'. It handles various cases and constraints for the parameters,
+and boundary parameters 'min' and 'max'. It handles various cases and constraints for the parameters,
 providing warnings and defaulting values as necessary. It aims to guide the user towards a suitable
 distribution choice based on the provided statistics.
 }
 \examples{
 # To choose a distribution with known mean and standard deviation:
-dist_type <- choose_dist_agg(mean = 5, sd = 2, a = NULL, b = NULL)
+dist_type <- choose_dist_agg(mean = 5, sd = 2, min = NULL, max = NULL)
 }

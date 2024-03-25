@@ -12,7 +12,5 @@ dirichlet_entropy_grad(x, shares)
 \item{shares}{}
 }
 \description{
-Derivative of the Dirichlet entropy function.
-Derivated using the `Deriv` package and `autodiffr`.
-For derivation see script:
+NOTE: Derivation does not seem to be correct. Is not used anymore.
 }

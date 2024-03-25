@@ -4,7 +4,7 @@
 \alias{sample_system}
 \title{Title}
 \usage{
-sample_system(n, data, x = "x", alpha = "alpha", beta = "beta", y = "y", ...)
+sample_system(n, data, x = "x", shares = "shares", sds = "sds", y = "y", ...)
 }
 \arguments{
 \item{...}{}

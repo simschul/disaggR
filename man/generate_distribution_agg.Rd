@@ -4,16 +4,16 @@
 \alias{generate_distribution_agg}
 \title{Generate Aggregated Distribution Based on Parameters}
 \usage{
-generate_distribution_agg(mean = NA, sd = NA, a = -Inf, b = Inf)
+generate_distribution_agg(mean = NA, sd = NA, min = -Inf, max = Inf)
 }
 \arguments{
 \item{mean}{The mean for the distribution, default is NA.}
 
 \item{sd}{The standard deviation for the distribution, default is NA.}
 
-\item{a}{The lower boundary for the distribution, default is -Inf.}
+\item{min}{The lower boundary for the distribution, default is -Inf.}
 
-\item{b}{The upper boundary for the distribution, default is Inf.}
+\item{max}{The upper boundary for the distribution, default is Inf.}
 }
 \value{
 A random sample from the chosen aggregated distribution or a stop message if no suitable distribution is found.

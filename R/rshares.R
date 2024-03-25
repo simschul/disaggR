@@ -4,7 +4,7 @@
 #'
 #' See: `?find_gamma_maxent2`
 #'
-#' @param N number of samples
+#' @param n number of samples
 #' @param shares Vector containing a best-guess (mean) values for the shares. Must sum to 1!
 #' @param ... other parameters passed to `find_gamma_maxent2`
 #'
@@ -12,10 +12,10 @@
 #' @export
 #'
 #' @examples
-rdir_maxent <- function(N, shares, ...) {
+rdir_maxent <- function(n, shares, ...) {
   out <- find_gamma_maxent2(shares, eval_f = dirichlet_entropy, ...)
   #sample <- gtools::rdirichlet(N, shares * out$solution)
-  sample <- rdir(N, alpha = shares, gamma = out$solution)
+  sample <- rdir(n, shares = shares, gamma = out$solution)
   colnames(sample) <- names(shares)
   return(sample)
 }
@@ -26,15 +26,15 @@ rdir_maxent <- function(N, shares, ...) {
 #' Uniform means each alpha is 1:https://en.wikipedia.org/wiki/Dirichlet_distribution#When_each_alpha_is_1
 #'
 #'
-#' @param N number of samples
+#' @param n number of samples
 #' @param length the number of variables
 #'
 #' @return a matrix with n rows and `length` cols, each containing a single Dirichlet random deviate
 #' @export
 #'
 #' @examples
-rdir1 <- function(N, length) {
-  sample <- rdirichlet(N, rep(1, length))
+rdir1 <- function(n, length) {
+  sample <- rdirichlet(n, rep(1, length))
   colnames(sample) <- names(shares)
   return(sample)
 }
@@ -233,7 +233,7 @@ rshares <- function(n, shares, sds = NULL,
     stop('na_action must be either "remove" or "fill"!')
   }
 
-  if (sum(shares) != 1) {
+  if (!isTRUE(all.equal(sum(shares), 1))) {
     stop('shares must sum to one! If you have NAs in your shares consider setting "na_action" to "fill". ')
   }
 
@@ -247,7 +247,7 @@ rshares <- function(n, shares, sds = NULL,
     sample <- rdirg(n, shares, sds)
   } else if (all(have_mean_only)) {
     # Dirichlet with maxent fitted gamma
-    sample <- rdir_maxent(N, shares)
+    sample <- rdir_maxent(n, shares)
   } else {
     # partial info: nested approach
     sample <- matrix(0, nrow = n, ncol = K)
@@ -255,8 +255,8 @@ rshares <- function(n, shares, sds = NULL,
 
     if (sum(have_both) > 0){
       # sample all shares with both mean + sd
-      sample[, have_both] <- rbeta3(n, mean = shares[have_both],
-                                   sd = sds[have_both], max_iter = max_iter)
+      sample[, have_both] <- rbeta3(n, shares = shares[have_both],
+                                   sds = sds[have_both], max_iter = max_iter)
     }
 
     if (sum(have_mean_only) > 0) {

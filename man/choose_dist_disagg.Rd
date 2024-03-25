@@ -4,12 +4,12 @@
 \alias{choose_dist_disagg}
 \title{Choose an Appropriate Disaggregated Distribution}
 \usage{
-choose_dist_disagg(alpha, beta)
+choose_dist_disagg(shares, sds)
 }
 \arguments{
-\item{alpha}{A numeric vector representing the alpha parameter(s) for the distribution.}
+\item{shares}{A numeric vector representing the shares parameter(s) for the distribution.}
 
-\item{beta}{A numeric vector representing the beta parameter(s) for the distribution, can be NULL or NA.}
+\item{sds}{A numeric vector representing the sds parameter(s) for the distribution, can be NULL or NA.}
 }
 \value{
 A character string indicating the type of disaggregated distribution selected based on the inputs,
@@ -17,10 +17,10 @@ Possible return values include 'dir1' for Dirichlet 1, 'dir_maxent' for Dirichle
 or NA if the inputs do not match any predefined distribution type.
 }
 \description{
-This function determines the appropriate disaggregated distribution type based on alpha and beta parameters.
+This function determines the appropriate disaggregated distribution type based on shares and sds parameters.
 It considers various scenarios and constraints related to the input parameters to select from specific distribution types.
 }
 \examples{
-# To determine a distribution with known alpha values:
-dist_type <- choose_dist_disagg(alpha = c(1,2,3), beta = NULL)
+# To determine a distribution with known shares values:
+dist_type <- choose_dist_disagg(shares = c(1,2,3), sds = NULL)
 }

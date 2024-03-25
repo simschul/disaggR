@@ -4,12 +4,12 @@
 \alias{generate_sampling_fun2}
 \title{Title}
 \usage{
-generate_sampling_fun2(data, x = "x", alpha = "alpha", beta = "beta", y = "y")
+generate_sampling_fun2(data, x = "x", shares = "shares", sds = "sds", y = "y")
 }
 \arguments{
 \item{data}{a data.frame containing all input information}
 
-\item{x}{column name of the information of the aggregate. The column must be a list of length nrow(data). Each list element itself is another list storing the information on the aggregate. The element of this inner elements must be named. Can include "mean", "sd", "a", "b" at the moment.}
+\item{x}{column name of the information of the aggregate. The column must be a list of length nrow(data). Each list element itself is another list storing the information on the aggregate. The element of this inner elements must be named. Can include "mean", "sd", "a", "max" at the moment.}
 
 \item{y}{names}
 }
@@ -18,14 +18,14 @@ Title
 }
 \examples{
 data <- structure(list(x = list(list(mean = 1, sd = 0.1, a = 0), list(
-mean = 10, a = 0), list(a = 0, b = 20), list(mean = 20, sd = 1)),
-alpha = list(c(`1` = 0.1, `2` = 0.3, `3` = 0.6), c(`1` = 0.3,
+mean = 10, a = 0), list(a = 0, max = 20), list(mean = 20, sd = 1)),
+shares = list(c(`1` = 0.1, `2` = 0.3, `3` = 0.6), c(`1` = 0.3,
                                                   `2` = 0.7),
                                                   c(`2` = 0.333333333333333,
                                                   `4` = 0.333333333333333,
                                                   `5` = 0.333333333333333),
                                                   c(`5` = 1)),
-                                                  beta = list(c(`1` = NA_real_,
+                                                  sds = list(c(`1` = NA_real_,
                                                   `2` = NA_real_, `3` = NA_real_),
                                                   c(`1` = 0.1, `2` = 0.05),
                                                   c(`2` = NA_real_, `4` = NA_real_,

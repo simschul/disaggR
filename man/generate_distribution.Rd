@@ -10,7 +10,7 @@ generate_distribution(fun, ...)
 \item{fun}{The distribution function to be generated (runif, rnorm, rlnorm, rweibull, rdir, etc.).}
 
 \item{...}{Additional parameters for the distribution function such as mean, sd for normal distribution,
-or alpha for dirichlet distribution. Supports named vectors for parameter values.}
+or shares for dirichlet distribution. Supports named vectors for parameter values.}
 }
 \value{
 A new function that takes a single argument 'n' and returns a sample of size 'n' from the specified distribution.
@@ -26,8 +26,8 @@ It handles numeric, character, and named vector parameters.
 my_normal <- generate_distribution(rnorm, mean = 10, sd = 2)
 sample <- my_normal(100)  # Generate 100 samples
 
-# Generate a dirichlet distribution function with named alpha vector
-my_dirichlet <- generate_distribution(rdir, alpha = c('3' = 1))
+# Generate a dirichlet distribution function with named shares vector
+my_dirichlet <- generate_distribution(rdir, shares = c('3' = 1))
 sample <- my_dirichlet(50)  # Generate 50 samples
 
 }

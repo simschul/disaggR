@@ -2,13 +2,20 @@
 % Please edit documentation in R/rshares.R
 \name{rdirg}
 \alias{rdirg}
-\title{Title}
+\title{Generate uniform random number from a Generalised Dirichlet distribution.}
 \usage{
-rdirg(n, alpha, beta)
+rdirg(n, shares, sds)
 }
 \arguments{
-\item{beta}{}
+\item{n}{sample size}
+
+\item{shares}{Vector containing a best-guess (mean) values for the shares. Must sum to 1!}
+
+\item{sds}{Vector of same length as `shares` containing the SDs of the shares.}
 }
 \description{
-Title
+Generate uniform random number from a Generalised Dirichlet distribution.
+}
+\references{
+Plessis, Sylvain, Nathalie Carrasco, and Pascal Pernot. “Knowledge-Based Probabilistic Representations of Branching Ratios in Chemical Networks: The Case of Dissociative Recombinations.” The Journal of Chemical Physics 133, no. 13 (October 7, 2010): 134110. https://doi.org/10.1063/1.3479907.
 }

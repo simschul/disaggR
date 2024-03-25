@@ -4,7 +4,7 @@
 \alias{generate_distribution_shares}
 \title{Title}
 \usage{
-generate_distribution_shares(alpha, beta, ...)
+generate_distribution_shares(shares, sds, ...)
 }
 \arguments{
 \item{...}{}

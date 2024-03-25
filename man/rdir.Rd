@@ -2,15 +2,19 @@
 % Please edit documentation in R/rshares.R
 \name{rdir}
 \alias{rdir}
-\title{Random Dirichlet distrubted numbers.
-Adds the gamma parameter compared to the standardt Dir variant.}
+\title{Random Dirichlet distributed numbers.
+Adds the gamma parameter compared to the standard Dir variant.}
 \usage{
-rdir(n, alpha, gamma)
+rdir(n, shares, gamma, threshold = 0.01)
 }
 \arguments{
+\item{shares}{vector containing a best-guess (mean) values for the shares. Must sum to 1!}
+
 \item{gamma}{}
+
+\item{threshold}{}
 }
 \description{
-Random Dirichlet distrubted numbers.
-Adds the gamma parameter compared to the standardt Dir variant.
+Random Dirichlet distributed numbers.
+Adds the gamma parameter compared to the standard Dir variant.
 }

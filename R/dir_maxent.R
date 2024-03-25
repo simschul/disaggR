@@ -2,6 +2,7 @@
 #' Derivated using the `Deriv` package and `autodiffr`.
 #' For derivation see script:
 #'
+#' NOTE: Derivation does not seem to be correct. Is not used anymore.
 #' @param x
 #' @param shares
 #'
@@ -19,16 +20,35 @@ dirichlet_entropy_grad <- function (x, shares)
       sum(shares * ((.e1 - 1) * trigamma(.e1) + digamma(.e1))))
 }
 
+#' Generalized beta function
+#'
+#' A generalization of the base `beta` function with any number of variables
+#'
+#' @param alpha a non-negative numeric vector
+#'
+#' @return
+#' @export
+#'
+#' @examples
 beta2 <- function(alpha) {
   prod(gamma(alpha)) / gamma(sum(alpha))
 }
 
 
 
-# Objective Function
+
+#' Dirichlet entropy function
+#'
+#' calculates the negative entropy of a dirichlet distribution given `shares` (sum to 1) and a concentration parameter `x`, so that `alpha = shares * x`
+#' from:  https://en.wikipedia.org/wiki/Dirichlet_distribution#Entropy
+#' @param x value of the concentration parameter (gamma)
+#' @param shares the shares (must sum to 1)
+#'
+#' @return
+#' @export
+#'
+#' @examples
 dirichlet_entropy <- function(x, shares) {
-  # from:  https://en.wikipedia.org/wiki/Dirichlet_distribution#Entropy
-  # calculates the negative entropy of a dirichlet distribution given `shares` (sum to 1) and a concentration parameter `x`, so that `alpha = shares * x`
   alpha <- x * shares
   K <- length(alpha)
   psi <- digamma(alpha)
@@ -74,13 +94,13 @@ find_gamma_maxent2 <- function(shares,
 ) {
 
 
-  shares <- shares[which(shares > shares_lb)]
-  shares <- shares/sum(shares)
 
 
   if (!isTRUE(all.equal(sum(shares), 1))) {
     stop('Shares must sum to 1. But `sum(shares)` gives ', sum(shares))
   }
+  shares <- shares[which(shares > shares_lb)]
+  shares <- shares/sum(shares)
 
   # lower and upper bounds
   lb <- bounds[1]

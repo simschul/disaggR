@@ -1,7 +1,7 @@
-rdisagg <- function(N, mean_0, sd_0 = NULL, min = 0, max = Inf,
+rdisagg <- function(n, mean_0, sd_0 = NULL, min = 0, max = Inf,
                     shares, sds = NULL) {
-  sample_agg <- ragg(N = N, mean = mean_0, sd = sd_0, min = min, max = max)
-  sample_shares <- rshares(N = N, shares = shares, sds = sds)
+  sample_agg <- ragg(n = n, mean = mean_0, sd = sd_0, min = min, max = max)
+  sample_shares <- rshares(n = n, shares = shares, sds = sds)
   sample_disagg <- sample_shares * sample_agg
 
   #names(sample_disagg) <- names(alpha)
