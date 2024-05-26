@@ -28,14 +28,15 @@ rdir_maxent <- function(n, shares, ...) {
 #'
 #' @param n number of samples
 #' @param length the number of variables
+#' @param names optional: a character vector of length `length` used as column names for the output sample
 #'
 #' @return a matrix with n rows and `length` cols, each containing a single Dirichlet random deviate
 #' @export
 #'
 #' @examples
-rdir1 <- function(n, length) {
+rdir1 <- function(n, length, names = NULL) {
   sample <- rdirichlet(n, rep(1, length))
-  colnames(sample) <- names(shares)
+  colnames(sample) <- names
   return(sample)
 }
 
@@ -340,7 +341,7 @@ rbeta3 <- function(n, shares, sds, fix = TRUE, max_iter = 1E3) {
                                not larger than 1. Either increase max_iter, or
                                change parameter combination. ')
   }
-
+  colnames(x) <- names(shares)
   return(x)
 }
 

@@ -12,5 +12,5 @@ dirichlet_entropy_grad(x, shares)
 \item{shares}{}
 }
 \description{
-NOTE: Derivation does not seem to be correct. Is not used anymore.
+NOTE: Derivation does not seem to be correct. Is not used anymore in the optimisation.
 }

@@ -1,3 +1,22 @@
+#' Generate random disaggregates
+#'
+#' Creates a random sample of disaggregates based on the information provided.
+#' The aggregate and the shares are sampled independently. The distribution
+#' from which to sample is determined internally based on the information
+#' provided by the user.
+#'
+#' @param n sample size
+#' @param mean_0 the best guess of the aggregate
+#' @param sd_0 the standard deviation of the aggregate
+#' @param min the lower boundary
+#' @param max the upper boundary
+#' @param shares best guesses for the shares (need to sum to one unless they contain NA's). See `?rshares`
+#' @param sds standard deviations of the shares (can contain NA). Set to NULL (default) if none available.
+#'
+#' @return
+#' @export
+#'
+#' @examples
 rdisagg <- function(n, mean_0, sd_0 = NULL, min = 0, max = Inf,
                     shares, sds = NULL) {
   sample_agg <- ragg(n = n, mean = mean_0, sd = sd_0, min = min, max = max)
@@ -7,8 +26,3 @@ rdisagg <- function(n, mean_0, sd_0 = NULL, min = 0, max = Inf,
   #names(sample_disagg) <- names(alpha)
   return(sample_disagg)
 }
-# temp1 <- ragg(N = 3, mu_0 = 100)
-# temp2 <- rshares(N = 3, alpha = c(0.1, 0.3, 0.6))
-# temp3 <- temp2 * temp1
-# rdisagg(N = 100, mu_0 = 100, sd_0 = 13, a = 0, b = Inf,
-#         alpha = c(0.1, 0.3, 0.6)) %>% boxplot

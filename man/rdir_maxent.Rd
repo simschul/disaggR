@@ -6,10 +6,10 @@
 $\gamma$ (or sometimes also noted $\alpha_0$) is estimated based on the
 the maximum entropy principle.}
 \usage{
-rdir_maxent(N, shares, ...)
+rdir_maxent(n, shares, ...)
 }
 \arguments{
-\item{N}{number of samples}
+\item{n}{number of samples}
 
 \item{shares}{Vector containing a best-guess (mean) values for the shares. Must sum to 1!}
 

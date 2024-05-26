@@ -2,7 +2,7 @@
 #' Derivated using the `Deriv` package and `autodiffr`.
 #' For derivation see script:
 #'
-#' NOTE: Derivation does not seem to be correct. Is not used anymore.
+#' NOTE: Derivation does not seem to be correct. Is not used anymore in the optimisation.
 #' @param x
 #' @param shares
 #'
@@ -141,7 +141,7 @@ find_gamma_maxent2 <- function(shares,
   # Run the optimizer
   res <- nloptr ( x0 = x0,
                   eval_f = eval_f,
-                  #eval_grad_f = eval_grad_f,
+                  #eval_grad_f = eval_grad_f, # uncomment if wanna use the derivative
                   lb = lb,
                   ub = ub,
                   opts = opts,

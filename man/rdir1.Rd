@@ -5,12 +5,14 @@
 \title{Generate uniform random number from a Dirichlet distribution.
 Uniform means each alpha is 1:https://en.wikipedia.org/wiki/Dirichlet_distribution#When_each_alpha_is_1}
 \usage{
-rdir1(N, length)
+rdir1(n, length, names = NULL)
 }
 \arguments{
-\item{N}{number of samples}
+\item{n}{number of samples}
 
 \item{length}{the number of variables}
+
+\item{names}{optional: a character vector of length `length` used as column names for the output sample}
 }
 \value{
 a matrix with n rows and `length` cols, each containing a single Dirichlet random deviate

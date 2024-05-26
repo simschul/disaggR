@@ -1,3 +1,15 @@
+#' Title
+#'
+#' @param n
+#' @param mean
+#' @param sd
+#' @param min
+#' @param max
+#'
+#' @return
+#' @export
+#'
+#' @examples
 ragg <- function(n, mean, sd = NULL, min = 0, max = Inf) {
   if (!is.null(mean) & !is.null(sd) & min == -Inf & max == Inf) {
     # Normal distribution
@@ -15,6 +27,3 @@ ragg <- function(n, mean, sd = NULL, min = 0, max = Inf) {
     stop('Case not implemented atm.')
   }
 }
-# ragg(N = 100, mean = 1) %>% hist
-# ragg(N = 100, mean = 1, sd = 0.5) %>% hist
-# ragg(N = 100, mean = 1, sd = 0.5, min = -Inf) %>% hist
